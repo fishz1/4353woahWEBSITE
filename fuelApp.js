@@ -74,8 +74,7 @@ app.post('/register', (req, res) => {
     console.log('Received password:', password);
 
     // Perform validation (e.g., check if username is unique, password meets criteria, etc.)
-    // Simulate saving to database for now
-    // Replace this with actual database operations in future iterations
+    // save into database in the future
 
     // Assuming successful registration
     res.redirect('/firstTimeProfile.html');
@@ -87,7 +86,7 @@ app.post('/createProfile', (req, res) => {
     const { full_name, address1, address2, city, state, zipcode } = req.body;
 
     // Perform any necessary validation or processing of the profile data
-    // For example, you could save it to a database or perform further validation
+    // save into database in the future
 
     // Assuming the profile data is saved successfully, user is sent back to home page
     res.redirect('/');
