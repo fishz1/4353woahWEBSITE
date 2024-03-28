@@ -52,11 +52,11 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     console.log('Request body:', req.body);
 
-    // Logging received username and password
+    // Logging received username and password (WILL BE TAKEN OUT LATER)
     console.log('Received username:', username);
     console.log('Received password:', password);
 
-    // Perform validation (you can replace this with your actual validation logic)
+    // Perform validation 
     if (username === 'user' && password === 'pass') {
         // If credentials are valid, return success message
         res.redirect('/fuelQuoteHistory.html');
@@ -70,6 +70,8 @@ app.post('/login', (req, res) => {
 app.post('/register', (req, res) => {
     // Extract username and password from request body
     const { username, password } = req.body;
+
+    //WILL BE TAKEN OUT LATER
     console.log('Received username:', username);
     console.log('Received password:', password);
 
