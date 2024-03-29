@@ -1,4 +1,4 @@
-Code coverage test using JEST: 93.75%
+Code coverage test using test.js and JEST: 93.75%
 
 Pricing Module Class (Wrote it in the fuelApp.js file but is commented out)
 
