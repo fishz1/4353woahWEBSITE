@@ -10,6 +10,7 @@ const port = 3000;
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Endpoint to serve root page
 app.get('/', (req, res) => {
@@ -50,20 +51,12 @@ app.get('/fuelQuoteHistory.html', (req, res) => {
 app.post('/login', (req, res) => {
     // Extract username and password from request body
     const { username, password } = req.body;
-    console.log('Request body:', req.body);
-
-    // Logging received username and password (WILL BE TAKEN OUT LATER)
-    console.log('Received username:', username);
-    console.log('Received password:', password);
 
     // Perform validation 
     if (username === 'user' && password === 'Password@123') {
-        // If credentials are valid, return success message
+        // If credentials are valid, redirect to fuelQuoteHistory.html
         res.redirect('/fuelQuoteHistory.html');
-    } else {
-        // If credentials are invalid, return error message
-        res.status(401).send('Invalid username or password');
-    }
+    } 
 });
 
 // Function to validate password
@@ -118,6 +111,44 @@ app.post('/createProfile', (req, res) => {
     // Assuming the profile data is saved successfully, user is sent back to home page
     res.redirect('/');
 });
+
+/* class PricingModule {
+    constructor(gallonsRequested, customerType, state) {
+        this.gallonsRequested = gallonsRequested;
+        this.customerType = customerType;
+        this.state = state;
+    }
+
+    calculatePrice() {
+        // Implement your price calculation logic here
+        // For example, you can have different pricing strategies based on customer type and state
+        let basePricePerGallon = 2.5; // Base price per gallon
+        
+        // Apply discounts or surcharges based on customer type and state
+        let totalPrice = this.gallonsRequested * basePricePerGallon;
+
+        // Example: New customers get a discount
+        if (this.customerType === 'new') {
+            totalPrice *= 0.95; // 5% discount for new customers
+        }
+
+        // Example: Apply state-specific surcharges or discounts
+        switch (this.state) {
+            case 'TX':
+                // Example: Texas customers get a discount
+                totalPrice *= 0.98; // 2% discount for Texas customers
+                break;
+            case 'CA':
+                // Example: California customers get a surcharge
+                totalPrice *= 1.03; // 3% surcharge for California customers
+                break;
+            // Add cases for other states as needed
+        }
+
+        // Round the total price to two decimal places
+        return Math.round(totalPrice * 100) / 100;
+    }
+} */
 
 // Export the Express app instance
 module.exports.app = app;
