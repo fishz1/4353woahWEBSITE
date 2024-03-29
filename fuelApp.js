@@ -57,7 +57,7 @@ app.post('/login', (req, res) => {
     console.log('Received password:', password);
 
     // Perform validation 
-    if (username === 'user' && password === 'pass') {
+    if (username === 'user' && password === 'Password@123') {
         // If credentials are valid, return success message
         res.redirect('/fuelQuoteHistory.html');
     } else {
@@ -119,7 +119,16 @@ app.post('/createProfile', (req, res) => {
     res.redirect('/');
 });
 
+// Export the Express app instance
+module.exports.app = app;
+
+// Export the validatePassword function
+module.exports.validatePassword = validatePassword;
+
 // Start the server
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+if (require.main === module) {
+    // Start the server only if this file is run directly (not imported)
+    app.listen(port, () => {
+        console.log(`Server is running on http://localhost:${port}`);
+    });
+}
