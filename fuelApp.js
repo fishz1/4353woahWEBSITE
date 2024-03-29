@@ -66,6 +66,27 @@ app.post('/login', (req, res) => {
     }
 });
 
+// Function to validate password
+function validatePassword(password) {
+    // Define criteria for password
+    const minLength = 8;
+    const maxLength = 20;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    // Check if password meets all criteria
+    return (
+        password.length >= minLength &&
+        password.length <= maxLength &&
+        hasUpperCase &&
+        hasLowerCase &&
+        hasNumber &&
+        hasSpecialChar
+    );
+}
+
 // Endpoint to handle registration form submission
 app.post('/register', (req, res) => {
     // Extract username and password from request body
@@ -76,10 +97,14 @@ app.post('/register', (req, res) => {
     console.log('Received password:', password);
 
     // Perform validation (e.g., check if username is unique, password meets criteria, etc.)
-    // save into database in the future
-
-    // Assuming successful registration
-    res.redirect('/firstTimeProfile.html');
+    if (!validatePassword(password)) {
+        // Password does not meet the criteria and user is redirected back to the registration page
+        res.redirect('/registrationPage.html?error=password');
+    } else {
+        // Password meets the criteria
+        // Save to database in the future
+        res.redirect('/firstTimeProfile.html');
+    }
 });
 
 // Endpoint to handle profile form submission
@@ -88,7 +113,7 @@ app.post('/createProfile', (req, res) => {
     const { full_name, address1, address2, city, state, zipcode } = req.body;
 
     // Perform any necessary validation or processing of the profile data
-    // save into database in the future
+    // Save to database in the future
 
     // Assuming the profile data is saved successfully, user is sent back to home page
     res.redirect('/');
