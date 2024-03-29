@@ -1,4 +1,4 @@
-npm install before running anything    
+npm install before running anything (installs all of the dependencies listed in the package.json file)
 
 To run Code coverage test:  
 npm test to perform code coverage using the unit tests in test.js  
