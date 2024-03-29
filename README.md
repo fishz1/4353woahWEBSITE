@@ -1,7 +1,7 @@
-'npm install' before running anything (installs all of the dependencies listed in the package.json file)
+Type 'npm install' in the terminal before running anything (installs all of the dependencies listed in the package.json file)
 
 To run Code coverage test:  
-'npm test' to perform code coverage using the unit tests in test.js  
+Type 'npm test' into the terminal to perform code coverage using the unit tests in test.js  
 
 Project Progress:  
 Code coverage test using test.js and JEST: 93.75%  
