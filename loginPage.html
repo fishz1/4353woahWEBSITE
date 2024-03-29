@@ -12,7 +12,7 @@
     </div>
     <div class="container">
         <h2>Login</h2>
-        <form action="/login" method="POST" enctype="application/x-www-form-urlencoded">
+        <form id="loginForm" action="/login" method="POST" enctype="application/x-www-form-urlencoded">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             <label for="password">Password:</label>
@@ -20,6 +20,27 @@
             <button type="submit">Login</button>
         </form>
         <p>Don't have an account? <a href="registrationPage.html">Register here</a></p>
+        <div id="errorMessage" style="display: none; color: red;">Invalid username or password. Please try again.</div>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            // Prevent the form from submitting normally
+            event.preventDefault();
+
+            // Get the username and password values
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Check if the username and password are correct
+            if (username !== 'user' || password !== 'Password@123') {
+                // Show the error message
+                document.getElementById('errorMessage').style.display = 'block';
+            } else {
+                // If credentials are correct, submit the form
+                this.submit();
+            }
+        });
+    </script>
 </body>
 </html>
