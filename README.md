@@ -1,6 +1,6 @@
-Still need to test code coverage (IN PROGRESS)
+Code coverage test: 93.75%
 
-Pricing Module Class (Not started yet)
+Pricing Module Class (Wrote it in the fuelApp.js file but is commented out)
 
 Still need to code validation for username and password in the registration (DONE)
 
