@@ -1,11 +1,17 @@
 Before Running the fuelApp.js:
+
 npm install express
+
 npm install path
+
 npm install body-parser
 
 To run Code coverage test:
+
 npm install supertest
+
 npm install jest
+
 npm test to perform code coverage using the unit tests in test.js
 
 Project Progress:
