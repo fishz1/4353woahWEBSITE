@@ -2,11 +2,21 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const { Pool } = require('pg');
 
 // Initialize Express app
 const app = express();
 app.use(express.static('public'));
 const port = 3000;
+
+// Initialize PostgreSQL connection pool
+const pool = new Pool({
+    user: 'postgre',
+    host: 'localhost',
+    database: 'loginDetails',
+    password: 'your_password',
+    port: 5432, 
+});
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -94,9 +104,14 @@ app.post('/register', (req, res) => {
         // Password does not meet the criteria and user is redirected back to the registration page
         res.redirect('/registrationPage.html?error=password');
     } else {
-        // Password meets the criteria
-        // Save to database in the future
-        res.redirect('/firstTimeProfile.html');
+        pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, password], (err, result) => {
+        if (err) {
+            console.error('Error registering user:', err);
+            res.redirect('/registrationPage.html?error=database');
+        } else {
+            res.redirect('/firstTimeProfile.html');
+        }
+    });
     }
 });
 

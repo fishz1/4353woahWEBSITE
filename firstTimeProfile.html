@@ -92,5 +92,12 @@
             <button type="submit">Save Profile</button>
         </form>
     </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        if (message === 'registrationSuccessful') {
+            alert('Registration successful, please complete your profile.');
+        }
+    </script>
 </body>
 </html>
