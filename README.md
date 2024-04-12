@@ -1,7 +1,11 @@
 Type 'npm install' in the terminal before running anything (installs all of the dependencies listed in the package.json file)
+
 npm install bcrypt
+
 npm install pg
+
 npm install express-session
+
 To run fuelApp app:  
 Type 'node fuelApp.js' into the terminal    
 
