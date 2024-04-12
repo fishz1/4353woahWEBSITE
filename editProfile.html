@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Page</title>
+    <title>Profile Edit Page</title>
     <link rel="stylesheet" href="styles.css">
     
 </head>
 <body>
     <nav>
         <ul>
-            <li><a href="firstTimeProfile.html">Client Profile</a></li>
+            <li><a href="profilePage.html">Client Profile</a></li>
             <li><a href="fuelQuote.html">Fuel Quote</a></li>
             <li><a href="fuelQuoteHistory.html">Fuel History</a></li>
         </ul>
@@ -18,7 +18,7 @@
     </nav>
     <div class="container">
         <h2>Complete Your Profile</h2>
-        <form action="/createProfile" method="POST">
+        <form action="/createProfile" method="POST" id="profileForm">
             <label for="full_name">Full Name:</label>
             <input type="text" id="full_name" name="full_name" maxlength="50" required>
 
@@ -91,13 +91,27 @@
 
             <button type="submit">Save Profile</button>
         </form>
+    <p id="message" style="display: none;"></p>
     </div>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const message = urlParams.get('message');
-        if (message === 'registrationSuccessful') {
-            alert('Registration successful, please complete your profile.');
-        }
+        document.getElementById('profileForm').addEventListener('submit', function(event) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            if (error === 'database') {
+            document.getElementById('message').innerText = 'Profile saved unsuccessfully!';
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').style.color = 'red';
+            }
+            else{
+            document.getElementById('message').innerText = 'Profile saved successfully!';
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').style.color = 'green';
+            }
+            
+            setTimeout(function() {
+                window.location.href = '/profilePage.html';
+            }, 3000); // Redirect after 3 seconds (adjust as needed)
+        });  
     </script>
 </body>
 </html>
