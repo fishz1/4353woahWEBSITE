@@ -16,30 +16,60 @@
         <a href="index.html" style="color: white;">Logout</a>
     </nav>
     <div class="container">
-    <h2>Fuel Quote History</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Gallons Requested</th>
-                <th>Delivery Address</th>
-                <th>Delivery Date</th>
-                <th>Suggested Price / gallon</th>
-                <th>Total Amount Due</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Example row -->
-            <tr>
-                <td>100</td>
-                <td>123 Main St, City, State</td>
-                <td>2023-02-21</td>
-                <td>$2.50</td>
-                <td>$250.00</td>
-            </tr>
-            <!-- Add more rows for each client quote -->
-        </tbody>
-    </table>
+        <h2>Fuel Quote History</h2>
+        <table id="fuelHistoryTable">
+            <thead>
+                <tr>
+                    <th>Gallons Requested</th>
+                    <th>Delivery Address</th>
+                    <th>Delivery Date</th>
+                    <th>Suggested Price / gallon</th>
+                    <th>Total Amount Due</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Fuel history data will be dynamically added here -->
+            </tbody>
+        </table>
     </div>
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to format ISO date string to MM/DD/YYYY format
+            function formatDate(isoDateString) {
+                const date = new Date(isoDateString);
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 because month is zero-based
+                const day = String(date.getDate()).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${month}/${day}/${year}`;
+            }
+            // Make fetch request to fetch fuel history data
+            fetch('/fuelHistory')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Process the received data and update the table
+                    console.log(data.gallonsRequested, data.deliveryAddress, data.deliveryDate, data.suggestedPrice, data.totalAmountDue);
+                    var fuelHistoryHtml = '';
+                    data.forEach(function(item) {
+                        fuelHistoryHtml += '<tr>';
+                        fuelHistoryHtml += '<td>' + item.gallonsrequested + '</td>';
+                        fuelHistoryHtml += '<td>' + item.deliveryaddress + '</td>';
+                        fuelHistoryHtml += '<td>' + formatDate(item.deliverydate) + '</td>';
+                        fuelHistoryHtml += '<td>$' + item.suggestedprice + '</td>';
+                        fuelHistoryHtml += '<td>$' + item.totalamountdue + '</td>';
+                        fuelHistoryHtml += '</tr>';
+                    });
+                    document.querySelector('#fuelHistoryTable tbody').innerHTML = fuelHistoryHtml;
+                })
+                .catch(error => {
+                    console.error('Error fetching fuel history:', error);
+                    // Handle error here, e.g., display a message to the user
+                });
+        });
+    </script>
 </body>
 </html>

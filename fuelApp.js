@@ -34,38 +34,50 @@ pool.query('SELECT NOW()', (err, res) => {
     }
 });
 
-pool.query(`
-    DROP TABLE IF EXISTS UserCredentials;
-    CREATE TABLE UserCredentials (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(255) UNIQUE,
-        password VARCHAR(255)
-    )
-`, (err, res) => {
-    if (err) {
-        console.error('Error creating users table:', err);
-    } else {
+async function createTables() {
+    try {
+        await pool.query(`
+            DROP TABLE IF EXISTS UserCredentials CASCADE;
+            CREATE TABLE UserCredentials (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE,
+                password VARCHAR(255)
+            )
+        `);
         console.log('Users table created successfully');
-    }
-});
 
-pool.query(`
-    DROP TABLE IF EXISTS ClientInformation;
-    CREATE TABLE ClientInformation (
-        id SERIAL PRIMARY KEY,
-        full_name VARCHAR(255),
-        address1 VARCHAR(255),
-        address2 VARCHAR(255),
-        city VARCHAR(100),
-        state VARCHAR(50),
-        zipcode VARCHAR(20)
-)`, (err, res) => {
-    if (err) {
-        console.error('Error creating ClientInformation table:', err);
-    } else {
+        await pool.query(`
+            DROP TABLE IF EXISTS ClientInformation;
+            CREATE TABLE ClientInformation (
+                id SERIAL PRIMARY KEY,
+                full_name VARCHAR(255),
+                address1 VARCHAR(255),
+                address2 VARCHAR(255),
+                city VARCHAR(100),
+                state VARCHAR(50),
+                zipcode VARCHAR(20)
+        )`);
         console.log('ClientInformation table created successfully');
+
+        await pool.query(`
+            DROP TABLE IF EXISTS FuelHistory;
+            CREATE TABLE IF NOT EXISTS FuelHistory (
+                id SERIAL PRIMARY KEY,
+                user_id INT REFERENCES UserCredentials(id),
+                gallonsRequested FLOAT,
+                deliveryAddress VARCHAR(255),
+                deliveryDate DATE,
+                suggestedPrice FLOAT,
+                totalAmountDue FLOAT
+            )
+        `);
+        console.log('FuelHistory table created successfully');
+    } catch (err) {
+        console.error('Error creating tables:', err);
     }
-});
+}
+
+createTables();
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -252,7 +264,7 @@ app.post('/createProfile', (req, res) => {
 });
 
 // Endpoint to serve profile page
-app.get('/profilePage', (req, res) => {
+app.get('/profileData', (req, res) => {
     const userId = req.session.userId;
 
     // Fetch user's profile information from the database
@@ -272,6 +284,43 @@ app.get('/profilePage', (req, res) => {
     });
 });
 
+// Endpoint to handle storing fuel history
+app.post('/storeFuelHistory', (req, res) => {
+    const { gallonsRequested, deliveryAddress, deliveryDate, suggestedPrice, totalAmountDue } = req.body;
+    const userId = req.session.userId;
+
+    // Insert fuel history data into FuelHistory table
+    pool.query('INSERT INTO FuelHistory (user_id, gallonsRequested, deliveryAddress, deliveryDate, suggestedPrice, totalAmountDue) VALUES ($1, $2, $3, $4, $5, $6)', 
+               [userId, gallonsRequested, deliveryAddress, deliveryDate, suggestedPrice, totalAmountDue], 
+               (err, result) => {
+        if (err) {
+            console.error('Error storing fuel history:', err);
+            res.redirect('/fuelQuote.html?error=database');
+        } 
+        
+    });
+});
+
+// Endpoint to fetch fuel history data
+app.get('/fuelHistory', (req, res) => {
+    const userId = req.session.userId;
+
+    // Fetch fuel history data for the logged-in user from the database
+    pool.query('SELECT * FROM FuelHistory WHERE user_id = $1', [userId], (err, result) => {
+        if (err) {
+            console.error('Error fetching fuel history:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+            // If fuel history data is found, send it to the client as JSON
+            if (result.rows.length > 0) {
+                const fuelHistory = result.rows;
+                res.json(fuelHistory);
+            } else {
+                res.status(404).json({ error: 'Fuel history not found' });
+            }
+        }
+    });
+});
 
 /* class PricingModule {
     constructor(gallonsRequested, customerType, state) {
