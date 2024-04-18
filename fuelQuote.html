@@ -10,7 +10,7 @@
   <body>
     <nav>
         <ul>
-            <li><a href="firstTimeProfile.html">Client Profile</a></li>
+            <li><a href="profilePage.html">Client Profile</a></li>
             <li><a href="fuelQuote.html">Fuel Quote</a></li>
             <li><a href="fuelQuoteHistory.html">Fuel History</a></li>
         </ul>
@@ -18,7 +18,7 @@
     </nav>
     <div class="container">
       <h2>Fuel Quote Form</h2>
-      <form>
+      <form action="/storeFuelHistory" method="POST" id="fuelForm">
         <label for="gallonsRequested">Gallons Requested:</label>
         <input
           type="number"
@@ -27,28 +27,56 @@
           placeholder="Number Gallons Requested"
           required
         />
-        <!--Use 'readonly' attribute because Delivery Address, Suggested Price/Gallon, and Total Amount Due values cannot be change by user through typing or selection options-->
         <label for="deliveryAddress">Delivery Address:</label>
-        <input
-          type="text"
-          id="deliveryAddress"
-          name="deliveryAddress"
-          value="123 Main St, City, State"
-          readonly
-        />
+<select id="deliveryAddress" name="deliveryAddress" required>
+    <option id="address1"></option>
+    <option id="address2"></option>
+</select>
 
         <label for="deliveryDate">Delivery Date:</label>
         <input type="date" id="deliveryDate" name="deliveryDate" required />
 
         <label for="suggestedPrice">Suggested Price / gallon:</label>
-        <input type="number" id="suggestedPrice" name="suggestedPrice" readonly />
+        <input type="number" id="suggestedPrice" name="suggestedPrice" required />
 
         <label for="totalAmountDue">Total Amount Due:</label>
-        <input type="number" id="totalAmountDue" name="totalAmountDue" readonly />
+        <input type="number" id="totalAmountDue" name="totalAmountDue" required />
         <br/>
         <button type="submit">Submit</button>
       </form>
+      <p id="message" style="display: none;"></p>
+      <script>
+        // Fetch client's profile information from the server
+        fetch('/profileData')
+          .then(response => response.json())
+          .then(data => {
+        // Assuming data.address1 and data.address2 are available
+        // You can set a default address here if needed
+          document.getElementById('address1').innerText += data.address1 || 'N/A';
+          document.getElementById('address2').innerText += data.address2 || 'N/A';
+        })
+        .catch(error => console.error('Error fetching profile data:', error));
+
+
+        document.getElementById('fuelForm').addEventListener('submit', function(event) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            if (error === 'database') {
+            document.getElementById('message').innerText = 'FuelQuote saved unsuccessfully!';
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').style.color = 'red';
+            }
+            else{
+            document.getElementById('message').innerText = 'FuelQuote saved successfully!';
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').style.color = 'green';
+            }
+            
+            setTimeout(function() {
+                window.location.href = '/profilePage.html';
+            }, 3000); // Redirect after 3 seconds (adjust as needed)
+        });
+    </script>
     </div>
-    <script src="script.js"></script>
   </body>
 </html>

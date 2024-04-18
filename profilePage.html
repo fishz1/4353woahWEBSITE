@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="profilePage.html">Client Profile</a></li>
+            <li><a href="fuelQuote.html">Fuel Quote</a></li>
+            <li><a href="fuelQuoteHistory.html">Fuel History</a></li>
+        </ul>
+        <a href="index.html" style="color: white;">Logout</a>
+    </nav>
+    <div class="container">
+        <h2>Your Profile</h2>
+        <div id="profileDisplay">
+            <p id="fullName">Full Name: </p>
+            <p id="address1">Address 1: </p>
+            <p id="address2">Address 2: </p>
+            <p id="city">City: </p>
+            <p id="state">State: </p>
+            <p id="zipcode">Zipcode: </p>
+        </div>
+        <button onclick="window.location.href='editProfile.html'">Edit Profile</button>
+    </div>
+    <script>
+        // Fetch profile data from the server and populate the HTML elements
+        fetch('/profileData')
+            .then(response => response.json())
+            .then(data => {
+                // Populate profile data, replacing null values with "N/A"
+                document.getElementById('fullName').innerText += data.full_name || 'N/A';
+                document.getElementById('address1').innerText += data.address1 || 'N/A';
+                document.getElementById('address2').innerText += data.address2 || 'N/A';
+                document.getElementById('city').innerText += data.city || 'N/A';
+                document.getElementById('state').innerText += data.state || 'N/A';
+                document.getElementById('zipcode').innerText += data.zipcode || 'N/A';
+            })
+            .catch(error => console.error('Error fetching profile data:', error));
+    </script>
+</body>
+</html>

@@ -41,9 +41,9 @@ describe('Express GET routes', () => {
         expect(response.text).toContain('<p>Already have an account? <a href="loginPage.html">Login</a></p>');
     })
 
-    // Test GET /firstTimeProfile.html route
+    // Test GET /editProfile.html route
     it('should respond with profile completion page content', async () => {
-        const response = await request(app).get('/firstTimeProfile.html');
+        const response = await request(app).get('/editProfile.html');
         expect(response.statusCode).toBe(200);
         expect(response.text).toContain('<form action="/createProfile" method="POST">');
         expect(response.text).toContain('<input type="text" id="full_name" name="full_name" maxlength="50" required>');
@@ -93,7 +93,7 @@ describe('Express POST endpoints', () => {
         expect(response.statusCode).toBe(302); // Assuming you redirect after successful registration
 
         // Check the location header to ensure it redirects to the correct page
-        expect(response.headers.location).toBe('/firstTimeProfile.html');
+        expect(response.headers.location).toBe('/editProfile.html');
     });
 
     it('should handle login form submission', async () => {

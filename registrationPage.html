@@ -49,36 +49,26 @@
     </div>
 
     <script>
-        document.getElementById('registrationForm').addEventListener('submit', function(event) {
-            const passwordInput = document.getElementById('password');
-            const password = passwordInput.value;
-
-            // Your password validation criteria
-            const minLength = 8;
-            const maxLength = 20;
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumber = /\d/.test(password);
-            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-            if (
-                password.length < minLength ||
-                password.length > maxLength ||
-                !hasUpperCase ||
-                !hasLowerCase ||
-                !hasNumber ||
-                !hasSpecialChar
-            ) {
-                // Password does not meet criteria, prevent form submission
-                event.preventDefault();
-                document.getElementById('errorMessage').innerText = 'Password does not meet the criteria. Must have uppercase, lowercase, and a special character. Password length should be 8-20. Please try again.';
-                document.getElementById('errorMessage').style.display = 'block';
-            } else {
-                // Password meets criteria, reset error message
-                document.getElementById('errorMessage').innerText = '';
-                document.getElementById('errorMessage').style.display = 'none';
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        if (error) {
+            let errorMessage = '';
+            switch (error) {
+                case 'password':
+                    errorMessage = 'Password does not meet the criteria. Must have uppercase, lowercase, and a special character. Password length should be 8-20. Please try again.';
+                    break;
+                case 'database':
+                    errorMessage = 'An error occurred while registering. Please try again later.';
+                    break;
+                case 'usernameTaken':
+                    errorMessage = 'This username is already taken. Please choose another one.';
+                    break;
+                default:
+                    errorMessage = 'An unknown error occurred. Please try again later.';
             }
-        });
+            document.getElementById('errorMessage').innerText = errorMessage;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
 
         const passwordInput = document.getElementById('password');
         const passwordToggle = document.getElementById('passwordToggle');

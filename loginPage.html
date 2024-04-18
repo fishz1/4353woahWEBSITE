@@ -20,27 +20,16 @@
             <button type="submit">Login</button>
         </form>
         <p>Don't have an account? <a href="registrationPage.html">Register here</a></p>
-        <div id="errorMessage" style="display: none; color: red;">Invalid username or password. Please try again.</div>
+        <div id="errorMessage" style="display: none; color: red;"></div>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            // Prevent the form from submitting normally
-            event.preventDefault();
-
-            // Get the username and password values
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            // Check if the username and password are correct
-            if (username !== 'user' || password !== 'Password@123') {
-                // Show the error message
-                document.getElementById('errorMessage').style.display = 'block';
-            } else {
-                // If credentials are correct, submit the form
-                this.submit();
-            }
-        });
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        if (error === 'invalidCredentials') {
+            document.getElementById('errorMessage').innerText = 'Invalid username or password. Please try again.';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
     </script>
 </body>
 </html>
