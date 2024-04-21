@@ -5,7 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fuel Quote Form</title>
     <link rel="stylesheet" href="styles.css">
-    
+    <style>
+        .button-container {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .button-container button {
+            flex: 1;
+            margin-right: 10px; /* Adjust margin as needed */
+        }
+
+        .button-container button:disabled {
+            opacity: 0.5; /* Adjust opacity to your preference */
+            cursor: not-allowed; /* Change cursor to indicate unavailability */
+        }
+    </style>
 </head>
   <body>
     <nav>
@@ -26,41 +41,60 @@
           name="gallonsRequested"
           placeholder="Number Gallons Requested"
           required
+          oninput="toggleButtons()"
         />
         <label for="deliveryAddress">Delivery Address:</label>
-<select id="deliveryAddress" name="deliveryAddress" required>
-    <option id="address1"></option>
-    <option id="address2"></option>
-</select>
+        <select id="deliveryAddress" name="deliveryAddress" required>
+        <option id="address1"></option>
+        <option id="address2"></option>
+        </select>
 
         <label for="deliveryDate">Delivery Date:</label>
         <input type="date" id="deliveryDate" name="deliveryDate" required />
 
         <label for="suggestedPrice">Suggested Price / gallon:</label>
-        <input type="number" id="suggestedPrice" name="suggestedPrice" required />
+        <input type="number" id="suggestedPrice" name="suggestedPrice" required readonly/>
 
         <label for="totalAmountDue">Total Amount Due:</label>
-        <input type="number" id="totalAmountDue" name="totalAmountDue" required />
+        <input type="number" id="totalAmountDue" name="totalAmountDue" required readonly/>
         <br/>
-        <button type="submit">Submit</button>
+        <div class="button-container">
+        <button type="button" id="getQuoteBtn" onclick="calculateTotalAmountDue()" disabled>Get Quote</button>
+        <button type="submit" id="submitBtn" disabled>Submit</button>
+        </div>
       </form>
       <p id="message" style="display: none;"></p>
       <script>
+        // Function to enable or disable buttons based on gallonsRequested value
+        function toggleButtons() {
+            if (document.getElementById('gallonsRequested').value.trim() === '') {
+                document.getElementById('getQuoteBtn').disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+            } else {
+                document.getElementById('getQuoteBtn').disabled = false;
+                document.getElementById('submitBtn').disabled = false;
+            }
+        };        
+
+        let locationPrice;
         // Fetch client's profile information from the server
         fetch('/profileData')
           .then(response => response.json())
           .then(data => {
         // Assuming data.address1 and data.address2 are available
-        // You can set a default address here if needed
-          document.getElementById('address1').innerText += data.address1 || 'N/A';
-          document.getElementById('address2').innerText += data.address2 || 'N/A';
+          locationPrice = data.state === 'TX' ? 0.02 : 0.04;
+          document.getElementById('address1').innerText = data.address1 ? `${data.address1}, ${data.city}, ${data.state} ${data.zipcode}` : 'N/A';
+          document.getElementById('address2').innerText = data.address2 ? `${data.address2}, ${data.city}, ${data.state} ${data.zipcode}` : 'N/A';
         })
         .catch(error => console.error('Error fetching profile data:', error));
-
 
         document.getElementById('fuelForm').addEventListener('submit', function(event) {
             const urlParams = new URLSearchParams(window.location.search);
             const error = urlParams.get('error');
+            if (document.getElementById('deliveryAddress').value === 'N/A') {
+                  alert('Please select a valid delivery address.');
+                  return;
+              }
             if (error === 'database') {
             document.getElementById('message').innerText = 'FuelQuote saved unsuccessfully!';
             document.getElementById('message').style.display = 'block';
@@ -76,6 +110,34 @@
                 window.location.href = '/profilePage.html';
             }, 3000); // Redirect after 3 seconds (adjust as needed)
         });
+        
+        async function calculateTotalAmountDue() {
+          let currentPrice = 1.5; 
+          let rateHistory = 0.00;  
+          let gallonsRequestedFactor = parseFloat(document.getElementById('gallonsRequested').value) > 1000 ? 0.02 : 0.03;
+          let companyProfit= 0.10;
+          
+          // Check if a valid address is selected
+              if (document.getElementById('deliveryAddress').value === 'N/A') {
+                  alert('Please select a valid delivery address.');
+                  return;
+              }
+          
+          const response = await fetch('/fuelHistory');
+          if (response.status === 404) {
+              rateHistory = 0.00; // Set rateHistory to 0.00 if no fuel history
+          } else if (response.ok) {
+              rateHistory = 0.01; // Set rateHistory to 0.01 if fuel history exist
+          } else {
+              throw new Error('Failed to fetch fuel history'); // Throw an error for other response statuses
+          }
+        
+          let margin = currentPrice*(locationPrice - rateHistory + gallonsRequestedFactor + companyProfit);
+          let suggestedPrice = currentPrice + margin;
+          let totalAmount = parseFloat(document.getElementById('gallonsRequested').value) * suggestedPrice;
+          document.getElementById('suggestedPrice').value = suggestedPrice.toFixed(2);    
+          document.getElementById('totalAmountDue').value = totalAmount.toFixed(2);
+        }
     </script>
     </div>
   </body>

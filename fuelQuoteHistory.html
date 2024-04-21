@@ -59,8 +59,8 @@
                         fuelHistoryHtml += '<td>' + item.gallonsrequested + '</td>';
                         fuelHistoryHtml += '<td>' + item.deliveryaddress + '</td>';
                         fuelHistoryHtml += '<td>' + formatDate(item.deliverydate) + '</td>';
-                        fuelHistoryHtml += '<td>$' + item.suggestedprice + '</td>';
-                        fuelHistoryHtml += '<td>$' + item.totalamountdue + '</td>';
+                        fuelHistoryHtml += '<td>$' + item.suggestedprice.toFixed(2) + '</td>';
+                        fuelHistoryHtml += '<td>$' + item.totalamountdue.toFixed(2) + '</td>';
                         fuelHistoryHtml += '</tr>';
                     });
                     document.querySelector('#fuelHistoryTable tbody').innerHTML = fuelHistoryHtml;
