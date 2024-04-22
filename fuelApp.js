@@ -23,16 +23,21 @@ const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
     password: 'password',
-    port: 5432, 
+    port: 5432,
+    max: 20, // maximum number of clients in the pool
+    idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+    connectionTimeoutMillis: 2000, // return an error after 2 seconds if connection could not be established
 });
 
-pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-        console.error('Error connecting to PostgreSQL:', err);
-    } else {
-        console.log('Connected to PostgreSQL database:', res.rows[0].now);
-    }
-});
+const testDatabaseConnection = () => {
+    pool.query('SELECT NOW()', (err, res) => {
+      // ...
+    });
+};
+  
+if (process.env.NODE_ENV !== 'test') {
+    testDatabaseConnection();
+}
 
 async function createTables() {
     try {
@@ -245,22 +250,18 @@ app.post('/register', async (req, res) => {
 });
 
 // Endpoint to handle profile form submission
-app.post('/createProfile', (req, res) => {
-    // Extract profile information from request body
+app.post('/createProfile', async (req, res) => {
     const { full_name, address1, address2, city, state, zipcode } = req.body;
-
-    // Retrieve logged-in user's ID from session
     const userId = req.session.userId;
 
-    // Insert profile information into the ClientInformation table with the user's ID
-    pool.query('UPDATE ClientInformation SET full_name = $1, address1 = $2, address2 = $3, city = $4, state = $5, zipcode = $6 WHERE id = $7', 
-               [full_name, address1, address2, city, state, zipcode, userId], 
-               (err, result) => {
-        if (err) {
-            console.error('Error saving profile information:', err);
-            res.redirect('/editProfile.html?error=database');
-        } 
-    });
+    try {
+        await pool.query('UPDATE ClientInformation SET full_name = $1, address1 = $2, address2 = $3, city = $4, state = $5, zipcode = $6 WHERE id = $7',
+                         [full_name, address1, address2, city, state, zipcode, userId]);
+        res.redirect('/profilePage.html');
+    } catch (error) {
+        console.error('Error saving profile information:', error);
+        res.redirect('/editProfile.html?error=database');
+    }
 });
 
 // Endpoint to serve profile page
@@ -296,8 +297,9 @@ app.post('/storeFuelHistory', (req, res) => {
         if (err) {
             console.error('Error storing fuel history:', err);
             res.redirect('/fuelQuote.html?error=database');
+        } else {
+            res.redirect('/fuelQuoteHistory.html');  // Assuming redirection to a history page
         } 
-        
     });
 });
 
@@ -322,14 +324,6 @@ app.get('/fuelHistory', (req, res) => {
     });
 });
 
-
-
-// Export the Express app instance
-module.exports.app = app;
-
-// Export the validatePassword function
-module.exports.validatePassword = validatePassword;
-
 // Start the server
 if (require.main === module) {
     // Start the server only if this file is run directly (not imported)
@@ -342,3 +336,5 @@ process.on('exit', () => {
     pool.end();
     console.log("done!")
 });
+
+module.exports = { app, validatePassword, pool };
