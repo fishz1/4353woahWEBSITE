@@ -1,5 +1,6 @@
 
 Type 'npm install' in the terminal before running anything (installs all of the dependencies listed in the package.json file) 
+
 Make sure you have PostgreSQL installed into your computer
 
 To run fuelApp app:  
