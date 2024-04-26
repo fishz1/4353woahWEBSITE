@@ -12,8 +12,5 @@ Type 'node fuelApp.js' into the terminal
 
 To run code coverage test:  
 Type 'npm test' into the terminal to perform code coverage using the unit tests in test.js  
-
-Project Progress:  
-Code coverage test using test.js and JEST: 93.75%  
-Pricing Module Class (Wrote it in the fuelApp.js file but is commented out)  
-Validation for username and password for in login and registration (FINISHED)  
+Code coverage test using test.js and JEST: 82.6%  
+ 
