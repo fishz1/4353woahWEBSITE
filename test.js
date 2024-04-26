@@ -153,10 +153,7 @@ describe('Express GET routes', () => {
     expect(consoleErrorMock).toHaveBeenCalledWith('Error fetching profile data:', mockedError);
     pool.query = originalQuery;
     consoleErrorMock.mockRestore();
-});
-
-
-
+    });
 });
 
 describe('Express POST endpoints', () => {
@@ -258,28 +255,28 @@ describe('Express POST endpoints', () => {
         expect(response.headers.location).toContain('/fuelQuoteHistory.html');
     });
     
-it('should handle errors while storing fuel history', async () => {
-    const fuelData = {
-        gallonsRequested: 100,
-        deliveryAddress: '123 Main St',
-        deliveryDate: 100, // Invalid date format
-        suggestedPrice: 3.5,
-        totalAmountDue: 350
-    };
+    it('should handle errors while storing fuel history', async () => {
+        const fuelData = {
+            gallonsRequested: 100,
+            deliveryAddress: '123 Main St',
+            deliveryDate: 100, 
+            suggestedPrice: 3.5,
+            totalAmountDue: 350
+        };
 
-    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    const response = await request(app)
-        .post('/storeFuelHistory')
-        .send(fuelData)
-        .type('form');
+        const response = await request(app)
+            .post('/storeFuelHistory')
+            .send(fuelData)
+            .type('form');
 
-    expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('/fuelQuote.html?error=database');
-    const receivedErrorMessage = consoleErrorMock.mock.calls[0][0];
-    expect(receivedErrorMessage).toContain('Error storing fuel history:');
-    consoleErrorMock.mockRestore();
-});
+        expect(response.statusCode).toBe(302);
+        expect(response.headers.location).toBe('/fuelQuote.html?error=database');
+        const receivedErrorMessage = consoleErrorMock.mock.calls[0][0];
+        expect(receivedErrorMessage).toContain('Error storing fuel history:');
+        consoleErrorMock.mockRestore();
+    });
 
     // Test POST /login endpoint
     it('should authenticate a user with correct credentials', async () => {
