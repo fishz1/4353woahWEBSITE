@@ -1,6 +1,7 @@
 // Import required modules
 const request = require('supertest');
 const { app, validatePassword, pool } = require('./fuelApp'); 
+const bcrypt = require('bcrypt');
 
 describe('Database Connection', () => {
     beforeAll(() => {
@@ -116,7 +117,46 @@ describe('Express GET routes', () => {
         expect(response.text).toContain('<th>Suggested Price / gallon</th>');
         expect(response.text).toContain('<th>Total Amount Due</th>');
     })
-    // Add similar tests for other routes...
+
+    it('should handle errors while fetching fuel history in the /fuelHistory route', async () => {
+    const originalQuery = pool.query;
+    const mockedError = new Error('Database error');
+    pool.query = jest.fn((query, values, callback) => {
+        callback(mockedError, null);
+    });
+    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const response = await request(app)
+        .get('/fuelHistory')
+        .set('Cookie', ['userId=testUserId']); // Simulating a logged-in user
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: 'Internal Server Error' });
+    expect(consoleErrorMock).toHaveBeenCalledWith('Error fetching fuel history:', mockedError);
+    pool.query = originalQuery;
+    consoleErrorMock.mockRestore();
+    });
+
+    it('should handle errors while fetching profile data in the /profileData route', async () => {
+    const originalQuery = pool.query;
+    const mockedError = new Error('Database error');
+    pool.query = jest.fn((query, values, callback) => {
+        callback(mockedError, null); // Simulating a database error
+    });
+    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await request(app)
+        .get('/profileData')
+        .set('Cookie', ['userId=testUserId']); // Simulating a logged-in user
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: 'Internal Server Error' });
+    expect(consoleErrorMock).toHaveBeenCalledWith('Error fetching profile data:', mockedError);
+    pool.query = originalQuery;
+    consoleErrorMock.mockRestore();
+});
+
+
+
 });
 
 describe('Express POST endpoints', () => {
@@ -158,7 +198,8 @@ describe('Express POST endpoints', () => {
         const response = await request(app).post('/register').send(existingUser).type('form');
         expect(response.statusCode).toBe(302);
         expect(response.headers.location).toContain('error=usernameTaken');
-    });    
+    }); 
+    
 
     it('should successfully update user profile and respond accordingly', async () => {
         const profileData = {
@@ -208,11 +249,38 @@ describe('Express POST endpoints', () => {
             gallonsRequested: 100
             // missing other fields like deliveryAddress, deliveryDate, etc.
         };
-        const response = await request(app).post('/storeFuelHistory').send(incompleteFuelData).type('form');
+        const response = await request(app)
+            .post('/storeFuelHistory')
+            .send(incompleteFuelData)
+            .type('form');
+
         expect(response.statusCode).toBe(302);
         expect(response.headers.location).toContain('/fuelQuoteHistory.html');
     });
     
+it('should handle errors while storing fuel history', async () => {
+    const fuelData = {
+        gallonsRequested: 100,
+        deliveryAddress: '123 Main St',
+        deliveryDate: 100, // Invalid date format
+        suggestedPrice: 3.5,
+        totalAmountDue: 350
+    };
+
+    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await request(app)
+        .post('/storeFuelHistory')
+        .send(fuelData)
+        .type('form');
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/fuelQuote.html?error=database');
+    const receivedErrorMessage = consoleErrorMock.mock.calls[0][0];
+    expect(receivedErrorMessage).toContain('Error storing fuel history:');
+    consoleErrorMock.mockRestore();
+});
+
     // Test POST /login endpoint
     it('should authenticate a user with correct credentials', async () => {
         const response = await request(app)
@@ -231,7 +299,29 @@ describe('Express POST endpoints', () => {
         expect(response.statusCode).toBe(302);
         expect(response.headers.location).toBe('/loginPage.html?error=invalidCredentials');
     });
-    
+
+   it('should handle errors while checking credentials in the /login route', async () => {
+    const originalQuery = pool.query;
+    const mockedError = new Error('Database error');
+    pool.query = jest.fn((query, values, callback) => {
+        callback(mockedError, null); // Simulating a database error
+    });
+    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const credentials = {
+        username: 'testUser',
+        password: 'invalidPassword' // Invalid password to trigger an error
+    };
+    const response = await request(app)
+        .post('/login')
+        .send(credentials)
+        .type('form');
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/loginPage.html?error=invalidCredentials');
+    expect(consoleErrorMock).toHaveBeenCalledWith('Error checking credentials:', mockedError);
+    pool.query = originalQuery;
+    consoleErrorMock.mockRestore();
+    });
+
 });
 
 describe('Password Hashing on Registration', () => {
@@ -298,7 +388,6 @@ describe('Database interactions', () => {
         await expect(pool.query(query, values)).rejects.toThrow('Database unavailable');
         jest.restoreAllMocks();
     });
-    // Further tests can mock pool.query using jest to simulate various scenarios like errors
 });
 
 describe('Password validation', () => {
@@ -341,3 +430,18 @@ describe('POST /createProfile error handling', () => {
     });
   
 });
+
+describe('Server Shutdown', () => {
+    it('should close the database pool and log "done!" on process exit', () => {
+        jest.spyOn(pool, 'end').mockImplementationOnce(() => {
+            console.log("Simulating database pool closure...");
+        });
+
+        const consoleSpy = jest.spyOn(console, 'log');
+        process.emit('exit');
+        expect(pool.end).toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalledWith("done!");
+    });
+});
+
+

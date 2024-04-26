@@ -257,7 +257,9 @@ app.post('/createProfile', async (req, res) => {
     try {
         await pool.query('UPDATE ClientInformation SET full_name = $1, address1 = $2, address2 = $3, city = $4, state = $5, zipcode = $6 WHERE id = $7',
                          [full_name, address1, address2, city, state, zipcode, userId]);
+        setTimeout(() => {
         res.redirect('/profilePage.html');
+        }, 2000);
     } catch (error) {
         console.error('Error saving profile information:', error);
         res.redirect('/editProfile.html?error=database');
@@ -298,7 +300,9 @@ app.post('/storeFuelHistory', (req, res) => {
             console.error('Error storing fuel history:', err);
             res.redirect('/fuelQuote.html?error=database');
         } else {
-            res.redirect('/fuelQuoteHistory.html');  // Assuming redirection to a history page
+            setTimeout(() => {
+            res.redirect('/fuelQuoteHistory.html');
+            }, 2000); // Assuming redirection to a history page
         } 
     });
 });
